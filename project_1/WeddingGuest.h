@@ -13,12 +13,14 @@ class WeddingGuest {
         std::string lastName;
         GuestType value;
 
+        GuestDetails* prev;
         GuestDetails* next;
 
-        GuestDetails(std::string firstName = "", std::string lastName = "", GuestType value = "", GuestDetails* next = nullptr) {
+        GuestDetails(std::string firstName = "", std::string lastName = "", GuestType value = "", GuestDetails* prev = nullptr, GuestDetails* next = nullptr) {
             this->firstName = firstName;
             this->lastName = lastName;
             this->value = value;
+            this->prev = prev;
             this->next = next;
         }
     };
@@ -27,11 +29,20 @@ class WeddingGuest {
 
     GuestDetails** table;
 
+    char toLower(char letter) const;
+
+    bool isLower(char letter) const;
+
+    bool isUpper(char letter) const;
+
     unsigned int hash(std::string lastName);
 
     unsigned int hash(GuestDetails* details);
 
+    // int compare(const std::string stringOne, const std::string stringTwo) const;
+
    public:
+    int compare(const std::string stringOne, const std::string stringTwo) const;
     WeddingGuest();  // Create an empty WeddingGuest list
     ~WeddingGuest();
     bool noGuests() const;  // Return true if the WeddingGuest list
