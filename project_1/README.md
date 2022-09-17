@@ -1,6 +1,6 @@
-### Project 1: Just Got Married!
+## Project 1: Just Got Married!
 
-#### Prompt
+### Prompt
 
 Do you want to know how challenging it was to get married last year during this
 pandemic? Challenging to say the least. Forget picking the place for the wedding
