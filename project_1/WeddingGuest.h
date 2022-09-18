@@ -29,22 +29,27 @@ class WeddingGuest {
 
     GuestDetails** table;
 
+    void inviteGuests(WeddingGuest& current, const WeddingGuest& other);
+
+    void inviteGuests(const WeddingGuest& other);
+
     char toLower(char letter) const;
 
     bool isLower(char letter) const;
 
     bool isUpper(char letter) const;
 
-    unsigned int hash(std::string lastName);
+    unsigned int hash(std::string lastName) const;
 
-    unsigned int hash(GuestDetails* details);
+    unsigned int hash(GuestDetails* details) const;
 
-    // int compare(const std::string stringOne, const std::string stringTwo) const;
+    int compare(const std::string stringOne, const std::string stringTwo) const;
 
    public:
-    int compare(const std::string stringOne, const std::string stringTwo) const;
     WeddingGuest();  // Create an empty WeddingGuest list
     ~WeddingGuest();
+    WeddingGuest(const WeddingGuest& other);
+    WeddingGuest& operator=(const WeddingGuest& other);
     bool noGuests() const;  // Return true if the WeddingGuest list
     // is empty, otherwise false.
     int guestCount() const;  // Return the number of matches
