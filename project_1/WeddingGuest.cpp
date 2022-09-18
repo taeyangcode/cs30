@@ -302,9 +302,7 @@ bool joinGuests(const WeddingGuest& odOne, const WeddingGuest& odTwo, WeddingGue
     };
 
     result = addGuest(odOne, odJoined);
-    result = addGuest(odTwo, odJoined);
-
-    return result;
+    return (result = addGuest(odTwo, odJoined));
 }
 
 void attestGuests(const std::string& fsearch, const std::string& lsearch, const WeddingGuest& odOne, WeddingGuest& odResult) {
