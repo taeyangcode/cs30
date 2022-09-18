@@ -1,6 +1,5 @@
 #include "WeddingGuest.h"
 
-#include <iostream>  // For testing
 #include <string>
 
 WeddingGuest::WeddingGuest() {
@@ -12,7 +11,9 @@ WeddingGuest::WeddingGuest() {
 
 WeddingGuest::~WeddingGuest() {
     for (unsigned int i = 0; i < this->BUCKET_SIZE; ++i) {
-        delete this->table[i];
+        for (GuestDetails* current = this->table[i]; current != nullptr; current = current->next) {
+            delete current;
+        }
     }
     delete[] this->table;
 }
@@ -152,16 +153,6 @@ bool WeddingGuest::inviteGuest(const std::string& firstName, const std::string& 
         return true;
     }
 
-    auto createNewGuest = [](std::string firstName, std::string lastName, std::string value, GuestDetails** table, GuestDetails* bucket, unsigned int bucketIndex) {
-        GuestDetails* newGuest = new GuestDetails(firstName, lastName, value, bucket->prev, bucket);
-        if (bucket->prev != nullptr) {
-            bucket->prev->next = newGuest;
-        } else {
-            table[bucketIndex] = newGuest;
-        }
-        bucket->prev = newGuest;
-    };
-
     while (bucket != nullptr) {
         const int lastNameComparison = this->compare(lastName, bucket->lastName);
         if (lastNameComparison == 0) {
@@ -170,13 +161,25 @@ bool WeddingGuest::inviteGuest(const std::string& firstName, const std::string& 
                 return false;
             }
             if (firstNameComparison == -1) {
-                createNewGuest(firstName, lastName, value, this->table, bucket, bucketIndex);
+                GuestDetails* newGuest = new GuestDetails(firstName, lastName, value, bucket->prev, bucket);
+                if (bucket->prev != nullptr) {
+                    bucket->prev->next = newGuest;
+                }
+                if (bucket->next != nullptr) {
+                    bucket->next->prev = newGuest;
+                }
                 return true;
             }
         }
 
         if (lastNameComparison == -1) {
-            createNewGuest(firstName, lastName, value, this->table, bucket, bucketIndex);
+            GuestDetails* newGuest = new GuestDetails(firstName, lastName, value, bucket->prev, bucket);
+            if (bucket->prev != nullptr) {
+                bucket->prev->next = newGuest;
+            }
+            if (bucket->next != nullptr) {
+                bucket->next->prev = newGuest;
+            }
             return true;
         }
 
@@ -209,17 +212,28 @@ bool WeddingGuest::inviteOrAlter(const std::string& firstName, const std::string
 }
 
 bool WeddingGuest::crossGuestOff(const std::string& firstName, const std::string& lastName) {
-    for (GuestDetails* current = this->table[this->hash(lastName)]; current != nullptr; current = current->next) {
-        if (firstName == current->firstName && lastName == current->lastName) {
-            if (current->prev != nullptr) {
-                current->prev->next = current->next;
+    const unsigned int bucketIndex = this->hash(lastName);
+    GuestDetails* bucket = this->table[bucketIndex];
+
+    while (bucket != nullptr) {
+        if (firstName == bucket->firstName && lastName == bucket->lastName) {
+            if (bucket == this->table[bucketIndex]) {
+                if (bucket->next == nullptr) {
+                    this->table[bucketIndex] = nullptr;
+                } else {
+                    bucket->next->prev = nullptr;
+                    this->table[bucketIndex] = bucket->next;
+                }
+            } else {
+                bucket->prev->next = bucket->next;
+                if (bucket->next != nullptr) {
+                    bucket->next->prev = bucket->prev;
+                }
             }
-            if (current->next != nullptr) {
-                current->next->prev = current->prev;
-            }
-            delete current;
+            delete bucket;
             return true;
         }
+        bucket = bucket->next;
     }
     return false;
 }
@@ -271,30 +285,39 @@ void WeddingGuest::swapWeddingGuests(WeddingGuest& other) {
 bool joinGuests(const WeddingGuest& odOne, const WeddingGuest& odTwo, WeddingGuest& odJoined) {
     bool result = true;
 
+    auto addGuest = [](const WeddingGuest& od, WeddingGuest& odJoined) -> bool {
+        bool result = true;
+        std::string firstName, lastName;
+        GuestType value, existingValue;
+        unsigned int index = 0;
+        for (bool guestLeft = od.verifyGuestOnTheList(index, firstName, lastName, value); guestLeft; guestLeft = od.verifyGuestOnTheList(++index, firstName, lastName, value)) {
+            if (odJoined.matchInvitedGuest(firstName, lastName, existingValue) && (value != existingValue)) {
+                odJoined.crossGuestOff(firstName, lastName);
+                result = false;
+                continue;
+            }
+            odJoined.inviteGuest(firstName, lastName, value);
+        }
+        return result;
+    };
+
+    result = addGuest(odOne, odJoined);
+    result = addGuest(odTwo, odJoined);
+
     return result;
 }
 
-int main() {
-    WeddingGuest weddingGuestOne;
-    weddingGuestOne.inviteGuest("Pete", "Best", "3");
-    weddingGuestOne.inviteGuest("John", "Lennon", "1");
-    weddingGuestOne.inviteGuest("Paul", "McCartney", "2");
-
-    WeddingGuest weddingGuestTwo;
-    weddingGuestTwo.inviteGuest("Pete", "Best", "6");
-    weddingGuestTwo.inviteGuest("George", "Harrison", "4");
-    weddingGuestTwo.inviteGuest("Ringo", "Starr", "5");
-
-    WeddingGuest weddingGuest;
-    std::cout << joinGuests(weddingGuestOne, weddingGuestTwo, weddingGuest) << "\n";
-
-    for (unsigned int n; n < weddingGuest.guestCount(); ++n) {
-        std::string firstName, lastName;
-        GuestType value;
-        weddingGuest.verifyGuestOnTheList(n, firstName, lastName, value);
-        std::cout << firstName << " " << lastName << " " << value << "\n";
+void attestGuests(const std::string& fsearch, const std::string& lsearch, const WeddingGuest& odOne, WeddingGuest& odResult) {
+    std::string firstName, lastName;
+    GuestType value;
+    int index = 0;
+    for (bool guestLeft = odOne.verifyGuestOnTheList(index, firstName, lastName, value); guestLeft; guestLeft = odOne.verifyGuestOnTheList(++index, firstName, lastName, value)) {
+        if ((fsearch == "*" || firstName == fsearch) && (lsearch == "*" || lastName == lsearch)) {
+            odResult.inviteGuest(firstName, lastName, value);
+        }
     }
-    std::cout << weddingGuest.guestCount();
+}
 
+int main() {
     return 0;
 }
