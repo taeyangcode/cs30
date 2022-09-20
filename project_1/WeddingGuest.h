@@ -4,7 +4,7 @@
 #include <string>
 
 typedef std::string GuestType;  // This can change to other types such
-                        // as double and int, not just string
+                                // as double and int, not just string
 class WeddingGuest {
    private:
     class GuestDetails {
@@ -101,5 +101,14 @@ class WeddingGuest {
     void swapWeddingGuests(WeddingGuest& other);
     // Exchange the contents of this list with the other one.
 };
+
+bool joinGuests(const WeddingGuest& odOne,
+                const WeddingGuest& odTwo,
+                WeddingGuest& odJoined);
+
+void attestGuests(const std::string& fsearch,
+                  const std::string& lsearch,
+                  const WeddingGuest& odOne,
+                  WeddingGuest& odResult);
 
 #endif

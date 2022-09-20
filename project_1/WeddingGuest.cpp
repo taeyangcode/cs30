@@ -210,15 +210,11 @@ bool WeddingGuest::inviteGuest(const std::string& firstName, const std::string& 
 }
 
 bool WeddingGuest::alterGuest(const std::string& firstName, const std::string& lastName, const GuestType& value) {
-    const unsigned int bucketIndex = this->hash(lastName);
-    GuestDetails* current = this->table[bucketIndex];
-
-    while (current != nullptr) {
-        if (firstName == current->firstName && lastName == current->lastName) {
+    for (GuestDetails* current = this->table[this->hash(lastName)]; current != nullptr; current = current->next) {
+        if (current->firstName == firstName && current->lastName == lastName) {
             current->value = value;
             return true;
         }
-        current = current->next;
     }
     return false;
 }
@@ -342,8 +338,4 @@ void attestGuests(const std::string& fsearch, const std::string& lsearch, const 
             }
         }
     }
-}
-
-int main() {
-    return 0;
 }
