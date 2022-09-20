@@ -1,3 +1,6 @@
 # executeable files
 *.out
 *.exe
+
+# OS specific files
+.DS_Store
