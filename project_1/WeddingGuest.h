@@ -1,11 +1,10 @@
 #ifndef WEDDING_GUEST_H
 #define WEDDING_GUEST_H
 
-#include <iostream>
 #include <string>
 
 typedef std::string GuestType;  // This can change to other types such
-                                // as double and int, not just string
+                        // as double and int, not just string
 class WeddingGuest {
    private:
     class GuestDetails {
@@ -17,7 +16,7 @@ class WeddingGuest {
         GuestDetails* prev;
         GuestDetails* next;
 
-        GuestDetails(std::string firstName = "", std::string lastName = "", GuestType value = "", GuestDetails* prev = nullptr, GuestDetails* next = nullptr) {
+        GuestDetails(std::string firstName = "", std::string lastName = "", GuestType value = NULL, GuestDetails* prev = nullptr, GuestDetails* next = nullptr) {
             this->firstName = firstName;
             this->lastName = lastName;
             this->value = value;

@@ -1,6 +1,5 @@
 #include "WeddingGuest.h"
 
-#include <iostream>
 #include <string>
 
 void WeddingGuest::clearBucket(GuestDetails* head) {
@@ -207,7 +206,7 @@ bool WeddingGuest::inviteGuest(const std::string& firstName, const std::string& 
 
         bucket = bucket->next;
     }
-    return true;
+    return false;
 }
 
 bool WeddingGuest::alterGuest(const std::string& firstName, const std::string& lastName, const GuestType& value) {
@@ -328,21 +327,23 @@ void attestGuests(const std::string& fsearch, const std::string& lsearch, const 
     std::string firstName, lastName;
     GuestType value;
     int index = 0;
-    for (bool guestLeft = odOne.verifyGuestOnTheList(index, firstName, lastName, value); guestLeft; guestLeft = odOne.verifyGuestOnTheList(++index, firstName, lastName, value)) {
-        if ((fsearch == "*" || firstName == fsearch) && (lsearch == "*" || lastName == lsearch)) {
-            odResult.inviteGuest(firstName, lastName, value);
+
+    if (&odOne == &odResult) {
+        for (bool guestLeft = odResult.verifyGuestOnTheList(index, firstName, lastName, value); guestLeft; guestLeft = odResult.verifyGuestOnTheList(++index, firstName, lastName, value)) {
+            if ((fsearch != "*" && firstName != fsearch) || (lsearch != "*" && lastName != lsearch)) {
+                odResult.crossGuestOff(firstName, lastName);
+                --index;
+            }
+        }
+    } else {
+        for (bool guestLeft = odOne.verifyGuestOnTheList(index, firstName, lastName, value); guestLeft; guestLeft = odOne.verifyGuestOnTheList(++index, firstName, lastName, value)) {
+            if ((fsearch == "*" || firstName == fsearch) && (lsearch == "*" || lastName == lsearch)) {
+                odResult.inviteGuest(firstName, lastName, value);
+            }
         }
     }
 }
 
 int main() {
-    WeddingGuest wg;
-    wg.inviteGuest("Corey", "Mostero", "v1");
-    wg.inviteGuest("Corey", "Lyu", "v1");
-    wg.inviteGuest("Corey", "Lostero", "v1");
-    wg.inviteGuest("Corey", "Postero", "v1");
-    wg.crossGuestOff("Corey", "Lyu");
-    std::cout << wg.guestCount();
-
     return 0;
 }
