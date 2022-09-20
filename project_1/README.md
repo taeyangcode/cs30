@@ -59,6 +59,6 @@ By this token anyone may feel free to "use, copy, modify, merge, publish, distri
 
 ### Contact
 
-Github: https://github.com/taeyangcode
-Email: taeyangcode@gmail.com
+Github: https://github.com/taeyangcode <br />
+Email: taeyangcode@gmail.com <br />
 Discord: 태양#0001
