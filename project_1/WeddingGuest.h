@@ -1,6 +1,7 @@
 #ifndef WEDDING_GUEST_H
 #define WEDDING_GUEST_H
 
+#include <iostream>
 #include <string>
 
 typedef std::string GuestType;  // This can change to other types such
@@ -28,6 +29,8 @@ class WeddingGuest {
     const unsigned int BUCKET_SIZE = 27;
 
     GuestDetails** table;
+
+    void clearBucket(GuestDetails* head);
 
     void inviteGuests(WeddingGuest& current, const WeddingGuest& other);
 

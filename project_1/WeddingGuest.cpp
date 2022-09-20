@@ -1,6 +1,15 @@
 #include "WeddingGuest.h"
 
+#include <iostream>
 #include <string>
+
+void WeddingGuest::clearBucket(GuestDetails* head) {
+    while (head != nullptr) {
+        GuestDetails* next = head->next;
+        delete head;
+        head = next;
+    }
+}
 
 WeddingGuest::WeddingGuest() {
     this->table = new GuestDetails*[this->BUCKET_SIZE];
@@ -11,9 +20,7 @@ WeddingGuest::WeddingGuest() {
 
 WeddingGuest::~WeddingGuest() {
     for (unsigned int i = 0; i < this->BUCKET_SIZE; ++i) {
-        for (GuestDetails* current = this->table[i]; current != nullptr; current = current->next) {
-            delete current;
-        }
+        this->clearBucket(this->table[i]);
     }
     delete[] this->table;
 }
@@ -39,6 +46,7 @@ void WeddingGuest::inviteGuests(const WeddingGuest& other) {
 WeddingGuest::WeddingGuest(const WeddingGuest& other) {
     this->table = new GuestDetails*[this->BUCKET_SIZE];
     for (unsigned int i = 0; i < this->BUCKET_SIZE; ++i) {
+        this->clearBucket(this->table[i]);
         this->table[i] = nullptr;
     }
     this->inviteGuests(other);
@@ -46,7 +54,7 @@ WeddingGuest::WeddingGuest(const WeddingGuest& other) {
 
 WeddingGuest& WeddingGuest::operator=(const WeddingGuest& other) {
     for (unsigned int i = 0; i < this->BUCKET_SIZE; ++i) {
-        delete this->table[i];
+        this->clearBucket(this->table[i]);
         this->table[i] = nullptr;
     }
     this->inviteGuests(other);
@@ -136,7 +144,6 @@ bool WeddingGuest::noGuests() const {
 int WeddingGuest::guestCount() const {
     unsigned int count = 0;
     for (unsigned int i = 0; i < this->BUCKET_SIZE; ++i) {
-        GuestDetails* current = this->table[i];
         for (GuestDetails* current = this->table[i]; current != nullptr; current = current->next) {
             ++count;
         }
@@ -161,6 +168,11 @@ bool WeddingGuest::inviteGuest(const std::string& firstName, const std::string& 
                 return false;
             }
             if (firstNameComparison == -1) {
+                if (this->table[bucketIndex] == bucket) {
+                    this->table[bucketIndex] = new GuestDetails(firstName, lastName, value, nullptr, bucket);
+                    bucket->prev = this->table[bucketIndex];
+                    return true;
+                }
                 GuestDetails* newGuest = new GuestDetails(firstName, lastName, value, bucket->prev, bucket);
                 if (bucket->prev != nullptr) {
                     bucket->prev->next = newGuest;
@@ -173,6 +185,11 @@ bool WeddingGuest::inviteGuest(const std::string& firstName, const std::string& 
         }
 
         if (lastNameComparison == -1) {
+            if (this->table[bucketIndex] == bucket) {
+                this->table[bucketIndex] = new GuestDetails(firstName, lastName, value, nullptr, bucket);
+                bucket->prev = this->table[bucketIndex];
+                return true;
+            }
             GuestDetails* newGuest = new GuestDetails(firstName, lastName, value, bucket->prev, bucket);
             if (bucket->prev != nullptr) {
                 bucket->prev->next = newGuest;
@@ -219,9 +236,11 @@ bool WeddingGuest::crossGuestOff(const std::string& firstName, const std::string
         if (firstName == bucket->firstName && lastName == bucket->lastName) {
             if (bucket == this->table[bucketIndex]) {
                 if (bucket->next == nullptr) {
+                    delete this->table[bucketIndex];
                     this->table[bucketIndex] = nullptr;
                 } else {
                     bucket->next->prev = nullptr;
+                    delete this->table[bucketIndex];
                     this->table[bucketIndex] = bucket->next;
                 }
             } else {
@@ -229,8 +248,8 @@ bool WeddingGuest::crossGuestOff(const std::string& firstName, const std::string
                 if (bucket->next != nullptr) {
                     bucket->next->prev = bucket->prev;
                 }
+                delete bucket;
             }
-            delete bucket;
             return true;
         }
         bucket = bucket->next;
@@ -317,5 +336,13 @@ void attestGuests(const std::string& fsearch, const std::string& lsearch, const 
 }
 
 int main() {
+    WeddingGuest wg;
+    wg.inviteGuest("Corey", "Mostero", "v1");
+    wg.inviteGuest("Corey", "Lyu", "v1");
+    wg.inviteGuest("Corey", "Lostero", "v1");
+    wg.inviteGuest("Corey", "Postero", "v1");
+    wg.crossGuestOff("Corey", "Lyu");
+    std::cout << wg.guestCount();
+
     return 0;
 }
