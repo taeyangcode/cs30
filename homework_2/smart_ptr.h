@@ -1,6 +1,14 @@
 #ifndef SMART_PTR_H_
 #define SMART_PTR_H_
 
+#include <stdexcept>
+
+class null_ptr_exception : public std::runtime_error {
+   public:
+    null_ptr_exception(const std::string& what_arg = "A null_ptr_exception error has occurred") : std::runtime_error(what_arg) {
+    }
+};
+
 template <typename T>
 class smart_ptr {
    private:
@@ -21,8 +29,13 @@ class smart_ptr {
     }
 
     explicit smart_ptr(T* raw_ptr) {
-        this->_data = raw_ptr;
-        this->_referenceCount = new unsigned int(1);
+        if (raw_ptr != nullptr) {
+            this->_data = raw_ptr;
+            this->_referenceCount = new unsigned int(1);
+            return;
+        }
+        this->_data = nullptr;
+        this->_referenceCount = nullptr;
     }
 
     smart_ptr(const smart_ptr& rhs) {
@@ -76,16 +89,20 @@ class smart_ptr {
 
     T& operator*() {
         if (this->_data == nullptr) {
-            throw std::runtime_error("null_ptr_exception");
+            throw null_ptr_exception();
         }
         return *this->_data;
     }
 
     T* operator->() {
         if (this->_data == nullptr) {
-            throw std::runtime_error("null_ptr_exception");
+            throw null_ptr_exception();
         }
         return this->_data;
+    }
+
+    explicit operator bool() const {
+        return this->_data != nullptr;
     }
 };
 
