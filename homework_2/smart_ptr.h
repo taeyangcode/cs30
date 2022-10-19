@@ -12,58 +12,61 @@ class null_ptr_exception : public std::runtime_error {
 template <typename T>
 class smart_ptr {
    private:
-    T* _data;
-    unsigned int* _referenceCount;
+    T* ptr_;
+    unsigned int* ref_;
 
    public:
     ~smart_ptr() {
-        if (this->_referenceCount != nullptr && --*this->_referenceCount == 0) {
-            delete this->_data;
-            delete this->_referenceCount;
+        if (this->ref_ != nullptr && --*this->ref_ == 0) {
+            delete this->ptr_;
+            delete this->ref_;
         }
     }
 
     smart_ptr() {
-        this->_data = nullptr;
-        this->_referenceCount = nullptr;
+        this->ptr_ = nullptr;
+        this->ref_ = nullptr;
     }
 
     explicit smart_ptr(T* raw_ptr) {
         if (raw_ptr != nullptr) {
-            this->_data = raw_ptr;
-            this->_referenceCount = new unsigned int(1);
+            this->ptr_ = raw_ptr;
+            this->ref_ = new unsigned int(1);
             return;
         }
-        this->_data = nullptr;
-        this->_referenceCount = nullptr;
+        this->ptr_ = nullptr;
+        this->ref_ = nullptr;
     }
 
     smart_ptr(const smart_ptr& rhs) {
-        this->_data = rhs._data;
-        this->_referenceCount = rhs._referenceCount;
-        if (this->_referenceCount != nullptr) {
-            ++*this->_referenceCount;
+        if (rhs.ptr_ != nullptr) {
+            this->ptr_ = rhs.ptr_;
+            this->ref_ = rhs.ref_;
+            ++*this->ref_;
+            return;
         }
+        this->ptr_ = nullptr;
+        this->ref_ = nullptr;
     }
 
     smart_ptr(smart_ptr&& rhs) {
-        this->_data = rhs._data;
-        this->_referenceCount = rhs._referenceCount;
+        this->ptr_ = rhs.ptr_;
+        this->ref_ = rhs.ref_;
 
-        rhs._data = nullptr;
-        rhs._referenceCount = nullptr;
+        rhs.ptr_ = nullptr;
+        rhs.ref_ = nullptr;
     }
 
     smart_ptr& operator=(const smart_ptr& rhs) {
         if (this != &rhs) {
-            if (this->_referenceCount != nullptr && --*this->_referenceCount == 0) {
-                delete this->_data;
-                delete this->_referenceCount;
+            if (this->ref_ != nullptr && --*this->ref_ == 0) {
+                delete this->ptr_;
+                delete this->ref_;
             }
-            this->_data = rhs._data;
-            this->_referenceCount = rhs._referenceCount;
-            if (this->_referenceCount != nullptr) {
-                ++*this->_referenceCount;
+            this->ptr_ = rhs.ptr_;
+            this->ref_ = rhs.ref_;
+            if (this->ref_ != nullptr) {
+                ++*this->ref_;
             }
         }
         return *this;
@@ -71,50 +74,50 @@ class smart_ptr {
 
     smart_ptr& operator=(smart_ptr&& rhs) {
         if (this != &rhs) {
-            if (this->_referenceCount != nullptr && --*this->_referenceCount == 0) {
-                delete this->_data;
-                delete this->_referenceCount;
+            if (this->ref_ != nullptr && --*this->ref_ == 0) {
+                delete this->ptr_;
+                delete this->ref_;
             }
-            this->_data = rhs._data;
-            this->_referenceCount = rhs._referenceCount;
+            this->ptr_ = rhs.ptr_;
+            this->ref_ = rhs.ref_;
 
-            rhs._data = nullptr;
-            rhs._referenceCount = nullptr;
+            rhs.ptr_ = nullptr;
+            rhs.ref_ = nullptr;
         }
         return *this;
     }
 
     bool clone() {
-        if (this == nullptr || *this->_referenceCount == 1) {
+        if (this == nullptr || *this->ref_ == 1) {
             return false;
         }
 
-        --*this->_referenceCount;
-        this->_data = new T(*this->_data);
-        this->_referenceCount = new unsigned int(1);
+        --*this->ref_;
+        this->ptr_ = new T(*this->ptr_);
+        this->ref_ = new unsigned int(1);
         return true;
     }
 
     int ref_count() const {
-        return (this->_referenceCount == nullptr) ? 0 : *this->_referenceCount;
+        return (this->ref_ == nullptr) ? 0 : *this->ref_;
     }
 
     T& operator*() {
-        if (this->_data == nullptr) {
+        if (this->ptr_ == nullptr) {
             throw null_ptr_exception();
         }
-        return *this->_data;
+        return *this->ptr_;
     }
 
     T* operator->() {
-        if (this->_data == nullptr) {
+        if (this->ptr_ == nullptr) {
             throw null_ptr_exception();
         }
-        return this->_data;
+        return this->ptr_;
     }
 
     explicit operator bool() const {
-        return this->_data != nullptr;
+        return this->ptr_ != nullptr;
     }
 };
 
