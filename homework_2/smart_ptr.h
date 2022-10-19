@@ -41,7 +41,7 @@ class smart_ptr {
     smart_ptr(const smart_ptr& rhs) {
         this->_data = rhs._data;
         this->_referenceCount = rhs._referenceCount;
-        ++*this->_referenceCount;
+        *this->_referenceCount += (this->_data != nullptr);
     }
 
     smart_ptr(smart_ptr&& rhs) {
