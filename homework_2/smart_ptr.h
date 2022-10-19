@@ -56,8 +56,9 @@ class smart_ptr {
 
     smart_ptr& operator=(const smart_ptr& rhs) {
         if (this != &rhs) {
-            if (this->_referenceCount != nullptr) {
-                --*this->_referenceCount;
+            if (this->_referenceCount != nullptr && --*this->_referenceCount == 0) {
+                delete this->_data;
+                delete this->_referenceCount;
             }
             this->_data = rhs._data;
             this->_referenceCount = rhs._referenceCount;
@@ -70,6 +71,10 @@ class smart_ptr {
 
     smart_ptr& operator=(smart_ptr&& rhs) {
         if (this != &rhs) {
+            if (this->_referenceCount != nullptr && --*this->_referenceCount == 0) {
+                delete this->_data;
+                delete this->_referenceCount;
+            }
             this->_data = rhs._data;
             this->_referenceCount = rhs._referenceCount;
 
