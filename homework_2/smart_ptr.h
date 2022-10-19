@@ -91,7 +91,6 @@ class smart_ptr {
         if (this == nullptr || *this->ref_ == 1) {
             return false;
         }
-
         --*this->ref_;
         this->ptr_ = new T(*this->ptr_);
         this->ref_ = new unsigned int(1);
