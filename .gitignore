@@ -1,0 +1,6 @@
+# vscode config
+.vscode/**
+
+# os specific files
+.DS_Store
+**/.DS_Store
