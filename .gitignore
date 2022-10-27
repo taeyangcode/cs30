@@ -1,6 +1,9 @@
 # vscode config
-.vscode/**
+.vscode
 
 # os specific files
 .DS_Store
-**/.DS_Store
+
+# executables
+*.out
+*.exe
