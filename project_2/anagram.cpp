@@ -52,7 +52,7 @@ int permute(std::string word, std::vector<std::string>& dict, std::vector<std::s
 }
 
 void display(std::vector<std::string>& results) {
-    for (auto resultIndex = results.rbegin(); resultIndex != results.rend() && *resultIndex != ""; --resultIndex) {
+    for (auto resultIndex = results.rbegin(); resultIndex != results.rend() && *resultIndex != ""; ++resultIndex) {
         std::cout << "Matching word " << *resultIndex << "\n";
     }
 }
