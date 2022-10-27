@@ -10,12 +10,9 @@ const int MAXDICTWORDS = 30000;  // Max words that can be read in
 int loadDictionary(std::istream& dictfile, std::vector<std::string>& dict) {
     int wordsLoaded = 0;
     std::string currentWord;
-
-    for (; !dictfile.eof(); ++wordsLoaded) {
-        dictfile >> currentWord;
+    for (dictfile >> currentWord; !dictfile.eof(); ++wordsLoaded, dictfile >> currentWord) {
         dict.push_back(currentWord);
     }
-
     return wordsLoaded;
 }
 
@@ -41,6 +38,7 @@ int permute(std::string word, std::vector<std::string>& dict, std::vector<std::s
     int matches = 0;
     std::vector<std::string> permutations;
     findPermutations(permutations, word, 0, word.size());
+
     for (std::string permutation : permutations) {
         for (auto dictIndex = dict.begin(); dictIndex != dict.end(); ++dictIndex) {
             if (permutation == *dictIndex) {
@@ -54,10 +52,8 @@ int permute(std::string word, std::vector<std::string>& dict, std::vector<std::s
 }
 
 void display(std::vector<std::string>& results) {
-    for (std::string s : results) {
-        if (s != "") {
-            std::cout << "Matching word " << s << "\n";
-        }
+    for (auto resultIndex = results.rbegin(); resultIndex != results.rend() && *resultIndex != ""; --resultIndex) {
+        std::cout << "Matching word " << *resultIndex << "\n";
     }
 }
 
