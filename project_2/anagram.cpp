@@ -17,7 +17,7 @@ int loadDictionary(std::istream& dictfile, std::vector<std::string>& dict) {
 }
 
 void findPermutations(std::vector<std::string>& permutations, std::string current, unsigned int index, unsigned int size) {
-    if (index + 1 >= size) {
+    if (index + 2 >= size) {
         for (std::string s : permutations) {
             if (current == s) {
                 return;
