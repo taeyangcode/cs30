@@ -1,4 +1,3 @@
-#include <iostream>
 #include <string>
 
 class TradeData {
@@ -45,7 +44,7 @@ void handlePriceChange(TradeData** tradeHistory, const int& tradeIndex, std::str
 }
 
 std::string* handleTrades(const std::string* data, const std::size_t dataSize) {
-    TradeData** tradeHistory = new TradeData*[3];
+    TradeData** tradeHistory = new TradeData* [3] {};
     std::string* result = new std::string[dataSize];
 
     int tradeIndex = 0;
@@ -71,28 +70,111 @@ std::string* handleTrades(const std::string* data, const std::size_t dataSize) {
     }
 
     for (unsigned int index = 0; index < 3; ++index) {
-        if (tradeHistory[index] != nullptr) {
-            delete tradeHistory[index];
-        }
+        delete tradeHistory[index];
     }
     delete[] tradeHistory;
     return result;
 }
 
-int main() {
+void testOne() {
+    const unsigned int size = 3;
+    std::string* data = new std::string[size];
+    data[0] = "0|20";
+    data[1] = "1|Tom|BUY|150000";
+    data[2] = "3|25";
+
+    const std::string* result = handleTrades(data, size);
+
+    for (unsigned int index = 0; index < size; ++index) {
+        if (index == 0) {
+            assert(result[index] == "1|Tom|BUY|150000");
+            continue;
+        }
+        assert(result[index] == "");
+    }
+
+    delete[] data;
+    delete[] result;
+}
+
+void testTwo() {
+    const unsigned int size = 3;
+    std::string* data = new std::string[size];
+    data[0] = "3|25";
+    data[1] = "8|Kristi|SELL|60000";
+    data[2] = "10|15";
+
+    const std::string* result = handleTrades(data, size);
+
+    for (unsigned int index = 0; index < size; ++index) {
+        if (index == 0) {
+            assert(result[index] == "8|Kristi|SELL|60000");
+            continue;
+        }
+        assert(result[index] == "");
+    }
+
+    delete[] data;
+    delete[] result;
+}
+
+void testThree() {
+    const unsigned int size = 5;
+    std::string* data = new std::string[size];
+    data[0] = "11|5";
+    data[1] = "14|Will|BUY|10000";
+    data[2] = "15|Will|BUY|10000";
+    data[3] = "16|Will|BUY|10000";
+    data[4] = "17|25";
+
+    const std::string* result = handleTrades(data, size);
+
+    for (unsigned int index = 0; index < size; ++index) {
+        assert(result[index] == "");
+    }
+
+    delete[] data;
+    delete[] result;
+}
+
+void testFour() {
     const unsigned int size = 6;
     std::string* data = new std::string[size];
     data[0] = "11|25";
-    data[1] = "14|Will|BUY|25000";
-    data[2] = "15|Will|BUY|25000";
-    data[3] = "16|Will|SELL|50000";
-    data[4] = "17|Will|SELL|50000";
+    data[1] = "14|Will|SELL|25000";
+    data[2] = "15|Will|SELL|25000";
+    data[3] = "16|Will|BUY|100000";
+    data[4] = "17|Will|SELL|100000";
     data[5] = "18|5";
 
     const std::string* result = handleTrades(data, size);
+
     for (unsigned int index = 0; index < size; ++index) {
-        std::cout << ((result[index] != "") ? result[index] + " " : "");
+        switch (index) {
+            case 0:
+                assert(result[index] == "15|Will|SELL|25000");
+                continue;
+            case 1:
+                assert(result[index] == "17|Will|SELL|100000");
+                continue;
+            default:
+                assert(result[index] == "");
+        }
     }
+
+    delete[] data;
+    delete[] result;
+}
+
+void test() {
+    testOne();
+    testTwo();
+    testThree();
+    testFour();
+}
+
+int main() {
+    test();
 
     return 0;
 }
