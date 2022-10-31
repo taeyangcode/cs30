@@ -40,16 +40,13 @@ std::string* handleTrades(std::string* data, std::size_t dataSize) {
             const unsigned int newPrice = std::stoi(currentData.substr(firstPipe + 1));
             for (int recentTrade = (tradeIndex - 3 < 0) ? 0 : tradeIndex - 3; recentTrade < tradeIndex; ++recentTrade) {
                 const TradeData* currentTrade = tradeHistory[recentTrade];
-                if (currentTrade == nullptr || currentTrade->day() < day - 3) {
-                    continue;
-                }
-                if (currentTrade->stock() * (newPrice - lastPrice) >= 500000) {
+                if (currentTrade != nullptr && currentTrade->day() >= day - 3 && currentTrade->stock() * (newPrice - lastPrice) >= 500000) {
                     result[resultIndex++] = currentTrade->data();
                     delete tradeHistory[recentTrade];
                     tradeHistory[recentTrade] = nullptr;
                 }
+                lastPrice = newPrice;
             }
-
             continue;
         }
 
@@ -60,17 +57,21 @@ std::string* handleTrades(std::string* data, std::size_t dataSize) {
     }
 
     for (unsigned int index = 0; index < tradeIndex; ++index) {
-        delete tradeHistory[index];
+        if (tradeHistory[index] != nullptr) {
+            delete tradeHistory[index];
+        }
     }
     return result;
 }
 
 int main() {
-    unsigned int size = 3;
+    unsigned int size = 5;
     std::string* data = new std::string[size];
-    data[0] = "0|20";
-    data[1] = "1|Tom|BUY|150000";
-    data[2] = "3|25";
+    data[0] = "11|5";
+    data[1] = "14|Will|BUY|10000";
+    data[2] = "15|Will|BUY|10000";
+    data[3] = "16|Will|BUY|10000";
+    data[4] = "17|25";
     std::string* result = handleTrades(data, size);
     for (unsigned int index = 0; index < size; ++index) {
         std::cout << result[index] << " ";
