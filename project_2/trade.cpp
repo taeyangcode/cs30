@@ -54,7 +54,7 @@ std::vector<std::string> findPotentialBadTraders(std::vector<std::string> v) {
         const std::string::size_type& secondPipe = data.find('|', firstPipe + 1);
         const std::string::size_type& lastPipe = data.find_last_of('|');
         const int tradePrice = std::stoi(data.substr(lastPipe + 1)) * (data[secondPipe + 1] == 66 ? 1 : -1);
-        cache[day] = TradeData(day, tradePrice, data);
+        cache[day] = TradeData(day, tradePrice, data.substr(0, secondPipe));
     }
 
     std::vector<std::string> result;
