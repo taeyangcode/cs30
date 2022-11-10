@@ -18,7 +18,7 @@ class smart_ptr {
     unsigned int* ref_;
 
    public:
-    ~smart_ptr() {
+    ~smart_ptr() noexcept {
         // If the pre-decrement value of the reference count is 0: delete the ptr_ value
         if (this->ref_ != nullptr && --*this->ref_ == 0) {
             delete this->ptr_;
@@ -26,12 +26,12 @@ class smart_ptr {
         }
     }
 
-    smart_ptr() {
+    smart_ptr() noexcept {
         this->ptr_ = nullptr;
         this->ref_ = nullptr;
     }
 
-    explicit smart_ptr(T* raw_ptr) {
+    explicit smart_ptr(T* raw_ptr) noexcept {
         // In the case that raw_ptr isn't nullptr, instantiate ptr_ and ref_ respectively.
         // It is also implied through my constructor implementations that smart_ptr objects
         // can only have both nullptr, or non-nullptr fields; no in-between.
@@ -44,7 +44,7 @@ class smart_ptr {
         this->ref_ = nullptr;
     }
 
-    smart_ptr(const smart_ptr& rhs) {
+    smart_ptr(const smart_ptr& rhs) noexcept {
         // Simply copy rhs fields and increase the shared reference count variable in the case
         // the pointer of rhs isn't nullptr.
         // This conditional is also an example of only having to check a single smart_ptr field for nullptr,
@@ -59,7 +59,7 @@ class smart_ptr {
         this->ref_ = nullptr;
     }
 
-    smart_ptr(smart_ptr&& rhs) {
+    smart_ptr(smart_ptr&& rhs) noexcept {
         this->ptr_ = rhs.ptr_;
         this->ref_ = rhs.ref_;
 
@@ -67,12 +67,12 @@ class smart_ptr {
         rhs.ref_ = nullptr;
     }
 
-    smart_ptr& operator=(const smart_ptr& rhs) {
+    smart_ptr& operator=(const smart_ptr& rhs) noexcept {
         // In the case that one attempts to assign a smart_ptr object to itself,
         // logically no action should be taken; hence the conditional
         if (this != &rhs) {
             // Due to the the reassignment of the current object, it is essential to check if
-            // ptr_ is the last reference, as the destructor will never run in this instance.
+            // ptr_ is the last reference, as the destructor will never run in this instance
             if (this->ref_ != nullptr && --*this->ref_ == 0) {
                 delete this->ptr_;
                 delete this->ref_;
@@ -86,7 +86,7 @@ class smart_ptr {
         return *this;
     }
 
-    smart_ptr& operator=(smart_ptr&& rhs) {
+    smart_ptr& operator=(smart_ptr&& rhs) noexcept {
         // Conditional follows the same logic as the copy assignment overload function
         if (this != &rhs) {
             // Conditional follows the same logic as the copy assignment overload function
@@ -104,19 +104,37 @@ class smart_ptr {
     }
 
     bool clone() {
-        if (this == nullptr || *this->ref_ == 1) {
+        if (this->ptr_ == nullptr || *this->ref_ == 1) {
             return false;
         }
-        --*this->ref_;
         // Initialization will only work with primitive data types* and objects that have
-        // an overloaded constructor that accepts its respective object type as an argument
+        // an overloaded copy constructor
         // *Based on my current knowledge of cpp primitive data types
-        this->ptr_ = new T(*this->ptr_);
-        this->ref_ = new unsigned int(1);
+
+        T* oldPtr = this->ptr_;
+        try {
+            this->ptr_ = new T(*this->ptr_);
+        } catch (std::bad_alloc) {
+            this->ptr_ = oldPtr;
+            throw std::bad_alloc();
+        }
+
+        unsigned int* newRef;
+        try {
+            newRef = new unsigned int(1);
+        } catch (std::bad_alloc) {
+            delete this->ptr_;
+            this->ptr_ = oldPtr;
+            throw std::bad_alloc();
+        }
+
+        --*this->ref_;
+        this->ref_ = newRef;
+
         return true;
     }
 
-    int ref_count() const {
+    int ref_count() const noexcept {
         // Ternary operator can be expanded as such:
         // if (this->ref_ == nullptr)
         //     return 0
